@@ -2,6 +2,8 @@ import tensorflow as tf
 import numpy as np
 from tensorflow import keras
 
+#from tf.keras.regularizers import l2, activity_l2
+
 # network and training
 EPOCHS = 50
 BATCH_SIZE = 128
@@ -36,9 +38,12 @@ Y_test = tf.keras.utils.to_categorical(Y_test, NB_CLASSES)
 
 #build the model
 model = tf.keras.models.Sequential()
-model.add(keras.layers.Dense(N_HIDDEN,
+
+layer1 = keras.layers.Dense(N_HIDDEN,
    		input_shape=(RESHAPED,),
-   		name='dense_layer', activation='relu'))
+   		name='dense_layer', activation='relu', kernel_regularizer='l1')
+
+model.add(layer1)
 model.add(keras.layers.Dense(N_HIDDEN,
    		name='dense_layer_2', activation='relu'))
 model.add(keras.layers.Dense(NB_CLASSES,
@@ -63,3 +68,9 @@ print('Test accuracy:', test_acc)
 
 # making prediction
 predictions = model.predict(X_test)
+
+
+# Epoch 50/50
+# 375/375 [==============================] - 1s 3ms/step - loss: 0.1018 - accuracy: 0.9715 - val_loss: 0.1268 - val_accuracy: 0.9649
+# 313/313 [==============================] - 1s 2ms/step - loss: 0.1211 - accuracy: 0.9638
+# Test accuracy: 0.9638000130653381

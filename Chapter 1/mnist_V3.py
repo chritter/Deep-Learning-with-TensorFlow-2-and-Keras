@@ -37,12 +37,19 @@ Y_test = tf.keras.utils.to_categorical(Y_test, NB_CLASSES)
 
 #build the model
 model = tf.keras.models.Sequential()
-model.add(keras.layers.Dense(N_HIDDEN,
+
+layer1 = keras.layers.Dense(N_HIDDEN,
    		input_shape=(RESHAPED,),
-   		name='dense_layer', activation='relu'))
-model.add(keras.layers.Dropout(DROPOUT))
+   		name='dense_layer', activation='relu')
+
+model.add(layer1)
+
+dr1= keras.layers.Dropout(DROPOUT)
+
+model.add(dr1)
 model.add(keras.layers.Dense(N_HIDDEN,
    		name='dense_layer_2', activation='relu'))
+
 model.add(keras.layers.Dropout(DROPOUT))
 model.add(keras.layers.Dense(NB_CLASSES,
    		name='dense_layer_3', activation='softmax'))
@@ -66,3 +73,5 @@ print('Test accuracy:', test_acc)
 
 # making prediction
 predictions = model.predict(X_test)
+
+

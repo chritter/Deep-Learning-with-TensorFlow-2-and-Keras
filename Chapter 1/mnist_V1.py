@@ -38,10 +38,13 @@ Y_test = tf.keras.utils.to_categorical(Y_test, NB_CLASSES)
 
 #build the model
 model = tf.keras.models.Sequential()
-model.add(keras.layers.Dense(NB_CLASSES,
+
+layer1 = keras.layers.Dense(NB_CLASSES,
    		input_shape=(RESHAPED,),
    		name='dense_layer', 
-   		activation='softmax'))
+   		activation='softmax')
+
+model.add(layer1)
 
 # summary of the model
 model.summary()

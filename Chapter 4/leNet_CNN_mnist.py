@@ -5,17 +5,20 @@ from tensorflow.keras import datasets, layers, models, optimizers
 #define the convnet 
 class LeNet:
 	@staticmethod
-	def build(input_shape, classes):
+	def build(input_shape, classes, just_fc=False):
 		model = models.Sequential()
-		# CONV => RELU => POOL
-		model.add(layers.Convolution2D(20, (5, 5), activation='relu',
-			input_shape=input_shape))
-		model.add(layers.MaxPooling2D(pool_size=(2, 2), strides=(2, 2)))
-		# CONV => RELU => POOL
-		model.add(layers.Convolution2D(50, (5, 5), activation='relu'))
-		model.add(layers.MaxPooling2D(pool_size=(2, 2), strides=(2, 2)))
-		# Flatten => RELU layers
-		model.add(layers.Flatten())
+
+		if not just_fc:
+			# CONV => RELU => POOL
+			model.add(layers.Convolution2D(20, (5, 5), activation='relu', input_shape=input_shape))
+			model.add(layers.MaxPooling2D(pool_size=(2, 2), strides=(2, 2)))
+			# CONV => RELU => POOL
+			model.add(layers.Convolution2D(50, (5, 5), activation='relu'))
+			model.add(layers.MaxPooling2D(pool_size=(2, 2), strides=(2, 2)))
+			# Flatten => RELU layers			
+			model.add(layers.Flatten())
+		else:
+			model.add(layers.Flatten(input_shape=input_shape))
 		model.add(layers.Dense(500, activation='relu'))
 		# a softmax classifier
 		model.add(layers.Dense(classes, activation="softmax"))
@@ -56,7 +59,7 @@ y_train = tf.keras.utils.to_categorical(y_train, NB_CLASSES)
 y_test = tf.keras.utils.to_categorical(y_test, NB_CLASSES)
 
 # initialize the optimizer and model
-model = LeNet.build(input_shape=INPUT_SHAPE, classes=NB_CLASSES)
+model = LeNet.build(input_shape=INPUT_SHAPE, classes=NB_CLASSES, just_fc=False)
 model.compile(loss="categorical_crossentropy", optimizer=OPTIMIZER,
 	metrics=["accuracy"])
 model.summary()
@@ -64,7 +67,7 @@ model.summary()
 # use TensorBoard, princess Aurora!
 callbacks = [
   # Write TensorBoard logs to `./logs` directory
-  tf.keras.callbacks.TensorBoard(log_dir='./logs')
+  tf.keras.callbacks.TensorBoard(log_dir='leNet_CNN_mnist_logs')
 ]
 
 # fit 

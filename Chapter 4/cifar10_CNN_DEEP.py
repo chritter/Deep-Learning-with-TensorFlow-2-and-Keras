@@ -56,9 +56,8 @@ def build_model():
     model.add(layers.Flatten())
     model.add(layers.Dense(NUM_CLASSES, activation='softmax'))
     return model
-
-    model.summary()
  
+
 
 (x_train, y_train, x_test, y_test) = load_data()
 model = build_model()
@@ -66,10 +65,19 @@ model.compile(loss='categorical_crossentropy',
             optimizer='RMSprop', 
             metrics=['accuracy'])
 
+model.summary()
+
 #train
 batch_size = 64
+
+# use TensorBoard, princess Aurora!
+callbacks = [
+  # Write TensorBoard logs to `./logs` directory
+  tf.keras.callbacks.TensorBoard(log_dir='cifar10_CNN_DEEP_logs')
+]
+
 model.fit(x_train, y_train, batch_size=batch_size,
-    epochs=EPOCHS, validation_data=(x_test,y_test)) 
+    epochs=EPOCHS, validation_data=(x_test,y_test), callbacks=callbacks) 
 score = model.evaluate(x_test, y_test,
                      batch_size=BATCH_SIZE)
 print("\nTest score:", score[0])

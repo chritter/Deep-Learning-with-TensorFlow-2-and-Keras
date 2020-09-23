@@ -10,6 +10,8 @@ BATCH_SIZE =500
 
 def load_data():
 	#load data
+	# Reviews have been preprocessed, and each review is encoded as a list of word indexes (integers).
+	# num_words allow to keep only the n_words=10000 most frequent words. all other appear as `oov_char` (0 index) value in the dataset
 	(X_train, y_train), (X_test, y_test) = datasets.imdb.load_data(num_words=n_words)
 	# Pad sequences with max_len
 	X_train = preprocessing.sequence.pad_sequences(X_train, maxlen=max_len)
@@ -23,8 +25,11 @@ def build_model():
 	# the model will output dimension (input_length, dim_embedding)
     # the largest integer in the input should be no larger
     # than n_words (vocabulary size).
-	model.add(layers.Embedding(n_words, 
-		dim_embedding, input_length=max_len))
+
+	embedding_layer = layers.Embedding(n_words, 
+		dim_embedding, input_length=max_len)
+
+	model.add(embedding_layer)
 
 	model.add(layers.Dropout(0.3))
 

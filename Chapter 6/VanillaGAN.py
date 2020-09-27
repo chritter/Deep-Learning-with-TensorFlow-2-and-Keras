@@ -28,6 +28,7 @@ import tqdm
 # Set the seed for reproducible result
 np.random.seed(1000)
 
+# RandomDim, conventionally 100, author decided 10
 randomDim = 10 
 # Load MNIST data
 (X_train, _), (_, _) = mnist.load_data()
@@ -51,12 +52,18 @@ generator.add(LeakyReLU(0.2))
 generator.add(Dense(784, activation='tanh'))
 #generator.compile(loss='binary_crossentropy', optimizer=adam)
 
+# Generator:
+# Total params: 1,463,312
+# Trainable params: 1,463,312
+# Non-trainable params: 0
+
 
 
 # In[4]:
 
 
 discriminator = Sequential()
+# why are e using a different kernal initializer? default is glorot_uniform
 discriminator.add(Dense(1024, input_dim=784, kernel_initializer=initializers.RandomNormal(stddev=0.02)))
 discriminator.add(LeakyReLU(0.2))
 discriminator.add(Dropout(0.3))
@@ -70,16 +77,34 @@ discriminator.add(Dense(1, activation='sigmoid'))
 discriminator.compile(loss='binary_crossentropy', optimizer=adam)
 
 
+# discriminator network (almost same number of parameter as generator)
+# Total params: 1,460,225
+# Trainable params: 0
+# Non-trainable params: 1,460,225
+
 # In[5]:
 
 
 # Combined network
 discriminator.trainable = False
+
 ganInput = Input(shape=(randomDim,))
+
+# pass through generator
 x = generator(ganInput)
+
+# pass through discriminator
 ganOutput = discriminator(x)
+
+# create model
 gan = Model(inputs=ganInput, outputs=ganOutput)
 gan.compile(loss='binary_crossentropy', optimizer=adam)
+
+# complete GAN
+# Total params: 2,923,537
+# Trainable params: 1,463,312
+# Non-trainable params: 1,460,225
+
 
 dLosses = []
 gLosses = []
@@ -144,8 +169,11 @@ def train(epochs=1, batchSize=128):
             dloss = discriminator.train_on_batch(X, yDis)
 
             # Train generator
+            # train with fake images
             noise = np.random.normal(0, 1, size=[batchSize, randomDim])
+            # we train the generator so that the discriminator perceives noise as 1!
             yGen = np.ones(batchSize)
+            # we fix the discriminator
             discriminator.trainable = False
             gloss = gan.train_on_batch(noise, yGen)
 

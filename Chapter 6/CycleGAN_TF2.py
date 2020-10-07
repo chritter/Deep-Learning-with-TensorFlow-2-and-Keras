@@ -324,26 +324,35 @@ fake = np.zeros((BATCH_SIZE, 16, 16, 1)).astype('float32')
 @tf.function
 def train_batch(imgs_A, imgs_B):
     with tf.GradientTape() as g, tf.GradientTape() as d_tape:
+
+        # generate fake images
         fake_B = generator_AB(imgs_A, training=True)
         fake_A = generator_BA(imgs_B, training=True)
         
+        # calculate loss for fake and real images for A
         logits_real_A = discriminator_A(imgs_A, training=True)
         logits_fake_A = discriminator_A(fake_A, training=True)
         dA_loss = discriminator_loss(logits_real_A, logits_fake_A)
-        
+
         logits_real_B = discriminator_B(imgs_B, training=True)
         logits_fake_B = discriminator_B(fake_B, training=True)
         dB_loss = discriminator_loss(logits_real_B, logits_fake_B)
         
+        # combine loss discriminator loss
         d_loss = (dA_loss + dB_loss) / 2
+
         # Translate images back to original domain
+        # fake_B was generated from imgs_A
         reconstr_A = generator_BA(fake_B, training=True)
+        # fake_A was generated from imgs_B
         reconstr_B = generator_AB(fake_A, training=True)
         
+        # purpose of this?
         id_A = generator_BA(imgs_A, training=True)
         id_B = generator_AB(imgs_B, training=True)
 
-
+        # create generator loss, to aim to trick discriminator
+        # 
         gen_loss = tf.math.reduce_sum([
             1 * tf.math.reduce_mean(mean_squared_error(logits_fake_A, valid)),
             1 * tf.math.reduce_mean(mean_squared_error(logits_fake_B, valid)),
@@ -352,13 +361,17 @@ def train_batch(imgs_A, imgs_B):
             0.1 * tf.math.reduce_mean(mean_squared_error(id_A, imgs_A)),
             0.1 * tf.math.reduce_mean(mean_squared_error(id_B, imgs_B)),
         ])
-        
+
+    # apply gradients for discriminators
+    # d_loss/d_trainable variables
     gradients_of_d = d_tape.gradient(d_loss, discriminator_A.trainable_variables + discriminator_B.trainable_variables)
     discriminator_optimizer.apply_gradients(zip(gradients_of_d, discriminator_A.trainable_variables + discriminator_B.trainable_variables))
 
+    # apply gradients for generators
     gradients_of_generator = g.gradient(gen_loss, generator_AB.trainable_variables + generator_BA.trainable_variables)
     optimizer.apply_gradients(zip(gradients_of_generator, generator_AB.trainable_variables + generator_BA.trainable_variables))
     
+    # returns individual discriminator loss and totla generator loss
     return dA_loss, dB_loss, gen_loss
 
 

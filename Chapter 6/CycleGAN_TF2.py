@@ -352,12 +352,12 @@ def train_batch(imgs_A, imgs_B):
         id_B = generator_AB(imgs_B, training=True)
 
         # create generator loss, to aim to trick discriminator
-        # 
+        # sets lambda = 10 as in paper.
         gen_loss = tf.math.reduce_sum([
-            1 * tf.math.reduce_mean(mean_squared_error(logits_fake_A, valid)),
-            1 * tf.math.reduce_mean(mean_squared_error(logits_fake_B, valid)),
-            10 * tf.math.reduce_mean(mean_squared_error(reconstr_A, imgs_A)),
-            10 * tf.math.reduce_mean(mean_squared_error(reconstr_B, imgs_B)),
+            1 * tf.math.reduce_mean(mean_squared_error(logits_fake_A, valid)), # regular adversarial loss
+            1 * tf.math.reduce_mean(mean_squared_error(logits_fake_B, valid)),# regular adversarial loss
+            10 * tf.math.reduce_mean(mean_squared_error(reconstr_A, imgs_A)), # forward cycle consistency loss A
+            10 * tf.math.reduce_mean(mean_squared_error(reconstr_B, imgs_B)), # backward cycle consistency loss B
             0.1 * tf.math.reduce_mean(mean_squared_error(id_A, imgs_A)),
             0.1 * tf.math.reduce_mean(mean_squared_error(id_B, imgs_B)),
         ])
@@ -421,6 +421,8 @@ def train(trainA_, trainB_, epochs):
                 axs[1,1].imshow(gen_outputB[0]*0.5 + 0.5)
                 axs[1,1].set_title("Generator B Output")
                 plt.show()
+                plt.savefig(f'train_epoch_{batch_i}.png')
+                plt.close()
 
                 discriminator_A.save_weights(checkpoint_prefixd_A.format(epoch=epoch))
                 discriminator_B.save_weights(checkpoint_prefixd_B.format(epoch=epoch))

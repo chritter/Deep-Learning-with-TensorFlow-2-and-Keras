@@ -1,22 +1,16 @@
+# Elmo: https://arxiv.org/abs/1802.05365
 import tensorflow as tf
 import tensorflow_hub as hub
 
-# module_url = "https://tfhub.dev/google/tf2-preview/elmo/2"
-# embed = hub.KerasLayer(module_url)
-# embeddings = embed([
-#     "i like green eggs and ham",
-#     "would you eat them in a box"
-# ])
-# print(embeddings.shape)
 
-module_url = "https://tfhub.dev/google/elmo/2"
+
 tf.compat.v1.disable_eager_execution()
-elmo = hub.Module(module_url, trainable=False)
-embeddings = elmo([
-        "i like green eggs and ham",
-        "would you eat them in a box"
-    ], 
+elmo = hub.Module("https://tfhub.dev/google/elmo/3", trainable=False)
+
+# "elmo" field: the weighted sum of the 3 layers, where the weights are trainable. This tensor has shape [batch_size, max_length, 1024]
+embeddings = elmo(
+    ["the cat is on the mat", "dogs are in the fog"],
     signature="default",
-    as_dict=True
-)["elmo"]
+    as_dict=True)["elmo"]
+
 print(embeddings.shape)

@@ -1,8 +1,12 @@
 import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'  # or any {'0', '1', '2'}
 import numpy as np
 import re
 import shutil
 import tensorflow as tf
+
+
+
 
 DATA_DIR = "./data"
 CHECKPOINT_DIR = os.path.join(DATA_DIR, "checkpoints")
@@ -49,8 +53,8 @@ class CharGenModel(tf.keras.Model):
             num_timesteps,
             recurrent_initializer="glorot_uniform",
             recurrent_activation="sigmoid",
-            stateful=True,
-            return_sequences=True
+            stateful=True, # keeps the state between batches
+            return_sequences=True # return the whole output sequence and not the last state only
         )
         self.dense_layer = tf.keras.layers.Dense(vocab_size)
 
@@ -94,7 +98,7 @@ texts = download_and_read([
 ])
 clean_logs()
 
-# create the vocabulary
+# create the vocabulary, 
 vocab = sorted(set(texts))
 print("vocab size: {:d}".format(len(vocab)))
 

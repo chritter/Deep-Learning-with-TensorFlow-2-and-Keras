@@ -65,12 +65,15 @@ class BahdanauAttention(tf.keras.layers.Layer):
 
         # add time axis to query: (batch_size, 1, num_units)
         query_with_time_axis = tf.expand_dims(query, axis=1)
-        # compute score:
+
+        # allignment score (e):
         score = self.V(tf.keras.activations.tanh(
             self.W1(values) + self.W2(query_with_time_axis)))
+
+        # then proceed with standard attention implementation       
         # compute softmax
         alignment = tf.nn.softmax(score, axis=1)
-        # compute attended output
+        # compute attended output, attention context (c)
         context = tf.reduce_sum(
             tf.linalg.matmul(
                 tf.linalg.matrix_transpose(alignment),
@@ -106,6 +109,8 @@ class Encoder(tf.keras.Model):
         self.encoder_dim = encoder_dim
         self.embedding = tf.keras.layers.Embedding(
             vocab_size, embedding_dim, input_length=num_timesteps)
+
+        # as attention mechanism needs sequence output, return here
         self.rnn = tf.keras.layers.GRU(
             encoder_dim, return_sequences=True, return_state=True)
 
@@ -138,11 +143,14 @@ class Decoder(tf.keras.Model):
     def call(self, x, state, encoder_out):
         x = self.embedding(x)
         context, alignment = self.attention(x, encoder_out)
+
+        # here we combine the attention context and the y_i-1 input
         x = tf.expand_dims(
                 tf.concat([
                     x, tf.squeeze(context, axis=1)
                 ], axis=1), 
             axis=1)
+        # the concat is treated as input y_i-1
         x, state = self.rnn(x, state)
         x = self.Wc(x)
         x = self.Ws(x)

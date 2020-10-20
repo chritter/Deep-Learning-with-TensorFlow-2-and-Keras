@@ -70,8 +70,11 @@ class Decoder(tf.keras.Model):
         self.decoder_dim = decoder_dim
         self.embedding = tf.keras.layers.Embedding(
             vocab_size, embedding_dim, input_length=num_timesteps)
+        # here we return the sequence at output, in contrast to encoder
         self.rnn = tf.keras.layers.GRU(
             decoder_dim, return_sequences=True, return_state=True)
+
+        # also this allows to return vector of vocab_size
         self.dense = tf.keras.layers.Dense(vocab_size)
 
     def call(self, x, state):
@@ -174,13 +177,14 @@ checkpoint_dir = clean_up_logs(data_dir)
 # data preparation
 download_url = "http://www.manythings.org/anki/fra-eng.zip"
 sents_en, sents_fr_in, sents_fr_out = download_and_read()
-
+# tokenizer english 
 tokenizer_en = tf.keras.preprocessing.text.Tokenizer(
     filters="", lower=False)
 tokenizer_en.fit_on_texts(sents_en)
 data_en = tokenizer_en.texts_to_sequences(sents_en)
 data_en = tf.keras.preprocessing.sequence.pad_sequences(data_en, padding="post")
 
+# tokenizer french
 tokenizer_fr = tf.keras.preprocessing.text.Tokenizer(
     filters="", lower=False)
 tokenizer_fr.fit_on_texts(sents_fr_in)
@@ -194,6 +198,7 @@ vocab_size_en = len(tokenizer_en.word_index)
 vocab_size_fr = len(tokenizer_fr.word_index)
 word2idx_en = tokenizer_en.word_index
 idx2word_en = {v:k for k, v in word2idx_en.items()}
+
 word2idx_fr = tokenizer_fr.word_index
 idx2word_fr = {v:k for k, v in word2idx_fr.items()}
 print("vocab size (en): {:d}, vocab size (fr): {:d}".format(

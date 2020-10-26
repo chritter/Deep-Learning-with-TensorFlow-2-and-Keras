@@ -15,6 +15,8 @@ import matplotlib.pyplot as plt
 
 np.random.seed(11)
 tf.random.set_seed(11)
+
+# set hyperparams
 batch_size = 256
 max_epochs = 50
 learning_rate = 1e-3
@@ -122,6 +124,11 @@ def train_loop(model, opt, loss, dataset, epochs=20):
 
 autoencoder = Autoencoder(hidden_dim=hidden_dim, original_dim=original_dim)
 opt = tf.keras.optimizers.Adam(learning_rate=1e-2)
+
+# Define the Keras TensorBoard callback.
+#logdir="logs/fit/" + datetime.now().strftime("%Y%m%d-%H%M%S")
+#tensorboard_callback = keras.callbacks.TensorBoard(log_dir=logdir)
+
 
 train_loop(autoencoder, opt, loss, training_dataset, epochs=max_epochs)
 

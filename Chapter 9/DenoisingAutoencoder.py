@@ -18,7 +18,7 @@ import matplotlib.pyplot as plt
 np.random.seed(11)
 tf.random.set_seed(11)
 batch_size = 256
-max_epochs = 3 #50
+max_epochs = 50
 learning_rate = 1e-3
 momentum = 8e-1
 hidden_dim = 128
@@ -141,7 +141,7 @@ for index in range(number):
     ax.get_xaxis().set_visible(False)
     ax.get_yaxis().set_visible(False)
 plt.show()
-plt.savefig('digitscomparison.png')
+plt.savefig('digitscomparison2.png')
 
 
 # In[ ]:

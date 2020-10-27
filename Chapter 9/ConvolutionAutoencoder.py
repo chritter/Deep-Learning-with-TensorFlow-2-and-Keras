@@ -4,6 +4,10 @@
 # In[1]:
 
 
+import matplotlib
+matplotlib.use('Agg')
+
+
 import numpy as np
 import tensorflow as tf
 import tensorflow.keras as K
@@ -121,11 +125,19 @@ model = Autoencoder(filters)
 
 model.compile(loss='binary_crossentropy', optimizer='adam')
 
+
+tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir="./logs3", 
+                            profile_batch=0, update_freq='epoch')
+
+
+
 loss = model.fit(x_train_noisy,
                 x_train,
                 validation_data=(x_test_noisy, x_test),
                 epochs=max_epochs,
-                batch_size=batch_size)
+                batch_size=batch_size,
+                callbacks=[tensorboard_callback])
+
 
 
 # In[8]:
@@ -156,4 +168,5 @@ for index in range(number):
     ax.get_xaxis().set_visible(False)
     ax.get_yaxis().set_visible(False)
 plt.show()
+plt.savefig('digitscomparison3.png')
 

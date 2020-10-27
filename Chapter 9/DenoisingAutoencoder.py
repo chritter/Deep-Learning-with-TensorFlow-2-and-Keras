@@ -3,6 +3,8 @@
 
 # In[1]:
 
+import matplotlib
+matplotlib.use('Agg')
 
 import numpy as np
 import tensorflow as tf
@@ -16,7 +18,7 @@ import matplotlib.pyplot as plt
 np.random.seed(11)
 tf.random.set_seed(11)
 batch_size = 256
-max_epochs = 50
+max_epochs = 3 #50
 learning_rate = 1e-3
 momentum = 8e-1
 hidden_dim = 128
@@ -98,11 +100,16 @@ model = Autoencoder(hidden_dim=hidden_dim, original_dim=original_dim)
 
 model.compile(loss='mse', optimizer='adam')
 
+
+tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir="./logs")
+
+
 loss = model.fit(x_train_noisy,
                 x_train,
                 validation_data=(x_test_noisy, x_test),
                 epochs=max_epochs,
-                batch_size=batch_size)
+                batch_size=batch_size,
+                callbacks=[tensorboard_callback])
 
 
 # In[9]:
@@ -113,6 +120,7 @@ plt.plot(range(max_epochs), loss.history['loss'])
 plt.xlabel('Epochs')
 plt.ylabel('Loss')
 plt.show()
+plt.savefig('loss.png')
 
 
 # In[10]:
@@ -133,6 +141,7 @@ for index in range(number):
     ax.get_xaxis().set_visible(False)
     ax.get_yaxis().set_visible(False)
 plt.show()
+plt.savefig('digitscomparison.png')
 
 
 # In[ ]:
